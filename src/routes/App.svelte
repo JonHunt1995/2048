@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Grid from './Grid.svelte';
-	import {playTurn, Game} from './board';
+	import {playTurn, type Game} from './board';
 
 	let game = $state<Game>(
 		{board: 
