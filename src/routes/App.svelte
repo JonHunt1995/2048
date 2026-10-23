@@ -1,52 +1,83 @@
 <script lang="ts">
 	import Grid from './Grid.svelte';
-	import {playTurn, type Game} from './board';
+	import {playTurn, range, numsToCells, spawnNum,type Game} from './board';
 
-	let game = $state<Game>(
-		{board: 
-	[
-		{id: 1, val: 2},
-		{id: 2, val: 2}, 
-		{id: 3, val: 2},
-		{id: 4, val: 2},
-		{id: 5, val: 2},
-		{id: 6, val: 2},
-		{id: 7, val: 2},
-		{id: 8, val: 2},
-		{id: 9, val: 0},
-		{id: 10, val: 0},
-		{id: 11, val: 0},
-		{id: 12, val: 0},
-		{id: 13, val: 0},
-		{id: 14, val: 0},
-		{id: 15, val: 0},
-		{id: 16, val: 0}
-	],
-	 score: 0,
-	 highest: 2,
-	 turn: 1
-});
+	function initGame(): Game {
+		let game: Game = {
+			board: numsToCells(range(0,16)),
+		score: 0,
+		highest: 2,
+		turn: 1
+		}
 
-		function handleKeydown(event) {
-		event.preventDefault();
+		for (let i = 0; i < 2; i++) {
+		game = spawnNum(game);
+		}
+
+		return game;
+	}
+
+	let game = $state<Game>(initGame());
+
+	
+	function handleKeydown(event: KeyboardEvent) {
 		switch (event.code) {
 			case 'ArrowLeft':
+				event.preventDefault();
 				game = playTurn(game, false, true);
 				break;
 			case 'ArrowUp':
+				event.preventDefault();
 				game = playTurn(game, true, true);
 				break;
 			case 'ArrowRight':
+				event.preventDefault();
 				game = playTurn(game, false, false);
 				break;
 			case 'ArrowDown':
+				event.preventDefault();
 				game = playTurn(game, true, false);
 				break;
 		}
 	}
+
+	    let touchStartX = 0;
+        let touchStartY = 0;
+
+        function handleTouchStart(event: TouchEvent) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        }
+
+        function handleTouchEnd(event: TouchEvent) {
+            const dx = event.changedTouches[0].clientX - touchStartX;
+            const dy = event.changedTouches[0].clientY - touchStartY;
+            const threshold = 30;
+
+            if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) {
+                    game = playTurn(game, false, false); // Right
+                } else {
+                    game = playTurn(game, false, true);  // Left
+                }
+            } else {
+                // Vertical
+                if (dy > 0) {
+                    game = playTurn(game, true, false);  // Down
+                } else {
+                    game = playTurn(game, true, true);   // Up
+                }
+            }
+        }
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window 
+onkeydown={handleKeydown}
+ontouchstart={handleTouchStart}
+ontouchend={handleTouchEnd}
+ />
 <section class="app">
 	<h1>Score: {game.score} Highest: {game.highest} Turn: {game.turn}</h1>
 	<Grid game={game}/>

@@ -1,7 +1,7 @@
-<script>
+<script lang=ts>
 	import { flip } from 'svelte/animate';
 	let {game} = $props();
-	let colors_to_nums = {
+	let colors_to_nums: Record<number, string> = {
 		0: '#cdc1b4',
 		2: '#eee4da', 
 		4: '#ede0c8', 
@@ -20,7 +20,7 @@
 {#each game.board as {id, val} (id)}
 	<div 
 		class="cell"
-		animate:flip={{duration: 100 }}
+		animate:flip={{duration: 200 }}
 		style="background: {colors_to_nums[val]}; color: black"
 		>{val ? val : ''}</div>
 {/each}
@@ -29,7 +29,7 @@
 <style>
 	.grid {
 	  display: grid;
-		background: '#cdc1b4';
+		background: #cdc1b4;
 		aspect-ratio: 1;
 		width: 80vmin;
 	  grid-template-columns: repeat(4, 1fr); 
@@ -39,9 +39,10 @@
 	  div {
 		  aspect-ratio: 1;
 		  display: flex;
-			outline: 1px solid black;
 		  justify-content: center;
 		  align-items: center;
+		  border-radius: 5px;
+		  font: 2rem sans-serif;
 		}
 }
 </style>

@@ -3,13 +3,6 @@ export type Cell = {
 	val: number
 }
 
-export type Direction = {
-	"Up",
-	"Down",
-	"Left",
-	"Right"
-}
-
 export type Game = {
 	board: Cell[],
 	score: number,
@@ -17,23 +10,23 @@ export type Game = {
 	turn: number
 }
 
-export const range = (start, stop, step=1) =>
+export const range = (start: number, stop: number, step=1) =>
   Array.from(
     { length: Math.ceil((stop - start) / step) },
     (_, i) => start + i * step,
   );
 
-const compareArrays = (a, b) =>
+const compareArrays = (a: Cell[], b: Cell[]) =>
   a.length === b.length &&
   a.every((element, index) => element.val === b[index].val && element.id === b[index].id);
 
-function getRandomInt(min, max) {
+function getRandomInt(min: number, max: number) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
-export const numsToCells = (nums: number[]): Cell[] => nums.map((num, i) => ({id: (i+1), val: num}))
+export const numsToCells = (nums: number[]): Cell[] => nums.map((num, i) => ({id: num, val: 0}))
 
 export const mergePairs = (game: Game, indices: number[]): Game  => {
 	let newBoard = JSON.parse(JSON.stringify(game.board));
@@ -51,14 +44,15 @@ export const mergePairs = (game: Game, indices: number[]): Game  => {
 	return {
 		board: newBoard,
 		highest: game.highest,
-		score: score
+		score: score,
+		turn: game.turn
 	}
 } 
 
 export const shiftRowOrCol = (
 	game: Game, 
 	indices: number[], 
-	fn: (...nums: number) => number): Game => {
+	fn: (...nums: number[]) => number): Game => {
 	let zeroIndices = indices.filter((idx) => game.board[idx].val === 0)
 	if (zeroIndices.length === 0) return game;
 	let zeroToSwap = fn(...zeroIndices);
@@ -79,9 +73,10 @@ export const shiftRowOrCol = (
 	}
 };
 
-const spawnNum = (game: Game): Game => {
+export const spawnNum = (game: Game): Game => {
 	let newBoard = JSON.parse(JSON.stringify(game.board));
-	let blanks = newBoard.filter((cell) => cell.val === 0);
+	let blanks = newBoard.filter((cell: Cell) => cell.val === 0);
+	if (blanks.length === 0) return game
 	let idToSpawn = blanks[getRandomInt(0, blanks.length)].id;
 
 	for (let i = 0; i < newBoard.length; i++) {
@@ -130,7 +125,7 @@ export const playTurn = (game: Game, vert=true, asc=true): Game => {
 	return {
 		board: newGame.board,
 		score: newGame.score,
-		highest: newGame.board.reduce((acc, cell) => Math.max(acc, cell.val), 0),
+		highest: newGame.board.reduce((acc: number, cell: Cell) => Math.max(acc, cell.val), 0),
 		turn: turn
 	}
 }
