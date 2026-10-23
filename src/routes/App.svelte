@@ -1,6 +1,8 @@
 <script lang="ts">
+	import Result from './Result.svelte';
 	import Grid from './Grid.svelte';
-	import {playTurn, range, numsToCells, spawnNum,type Game} from './board';
+
+	import {playTurn, canMove, range, numsToCells, spawnNum,type Game} from './board';
 
 	function initGame(): Game {
 		let game: Game = {
@@ -18,8 +20,8 @@
 	}
 
 	let game = $state<Game>(initGame());
+	let ongoing = $derived<boolean>(canMove(game));
 
-	
 	function handleKeydown(event: KeyboardEvent) {
 		switch (event.code) {
 			case 'ArrowLeft':
@@ -41,36 +43,35 @@
 		}
 	}
 
-	    let touchStartX = 0;
-        let touchStartY = 0;
+	let touchStartX = 0;
+    let touchStartY = 0;
 
-        function handleTouchStart(event: TouchEvent) {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        }
+    function handleTouchStart(event: TouchEvent) {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }
 
-        function handleTouchEnd(event: TouchEvent) {
-            const dx = event.changedTouches[0].clientX - touchStartX;
-            const dy = event.changedTouches[0].clientY - touchStartY;
-            const threshold = 30;
+    function handleTouchEnd(event: TouchEvent) {
+        const dx = event.changedTouches[0].clientX - touchStartX;
+        const dy = event.changedTouches[0].clientY - touchStartY;
+        const threshold = 30;
 
-            if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
 
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0) {
-                    game = playTurn(game, false, false); // Right
-                } else {
-                    game = playTurn(game, false, true);  // Left
-                }
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                game = playTurn(game, false, false); // Right
             } else {
-                // Vertical
-                if (dy > 0) {
-                    game = playTurn(game, true, false);  // Down
-                } else {
-                    game = playTurn(game, true, true);   // Up
-                }
+                game = playTurn(game, false, true);  // Left
+            }
+        } else {
+            if (dy > 0) {
+                game = playTurn(game, true, false);  // Down
+            } else {
+                game = playTurn(game, true, true);   // Up
             }
         }
+    }
 </script>
 
 <svelte:window 
@@ -78,6 +79,9 @@ onkeydown={handleKeydown}
 ontouchstart={handleTouchStart}
 ontouchend={handleTouchEnd}
  />
+{#if !ongoing}
+	<Result game={game}/>
+{/if}
 <section class="app">
 	<h1>Score: {game.score} Highest: {game.highest} Turn: {game.turn}</h1>
 	<Grid game={game}/>

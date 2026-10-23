@@ -26,6 +26,15 @@ function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
+export const canMove = (game: Game):boolean => {
+	return game.board.some((cell: Cell, i, arr) => (
+		cell.val === 0 ||
+		i >= 4 && arr[i-4].val === cell.val ||
+		i < 12 && arr[i+4].val === cell.val ||
+		i % 4 > 0 && arr[i-1].val === cell.val ||
+		i % 4 < 3 && arr[i+1].val === cell.val
+	))
+}
 export const numsToCells = (nums: number[]): Cell[] => nums.map((num, i) => ({id: num, val: 0}))
 
 export const mergePairs = (game: Game, indices: number[]): Game  => {
